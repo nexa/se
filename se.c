@@ -182,16 +182,9 @@ int main(int argc, char **argv)
   page_init(page);
 
   /*page_set_url(page, "ubuntu.unix-center.net", "ubuntu.unix-center.net", NULL);*/
-  page_set_url(page, "192.168.10.32", "192.168.10.32", NULL);
+  page_set_url(page, "192.168.1.5", "192.168.1.5", NULL);
   
   crawl_page(page);
-
- 
- 
- 
- 
-
-
 
   event_base_dispatch(base);
  

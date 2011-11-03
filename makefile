@@ -19,5 +19,4 @@ test.o:test.c
 
 
 clean:
-	rm *.o
-	rm test
+	rm *.o se
