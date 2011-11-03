@@ -23,6 +23,11 @@
 #include "spiders.h"
 
 #define SPIDERS 20
+typedef struct _t TT;
+struct _t
+{
+  int a;
+};
 
 typedef struct sockaddr SA;
 
