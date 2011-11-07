@@ -1,0 +1,5 @@
+#!/bin/sh
+cd ~/ws/
+find -name "*.o" | xargs rm -v
+find -name "*~" | xargs rm -v
+find -name "*\#" | xargs rm -v
