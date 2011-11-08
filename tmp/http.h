@@ -6,41 +6,45 @@
 #ifndef _HTTP_H_
 #define _HTTP_H_
 
-typedef struct _hdr_entry_t hdr_entry_t;
+typedef struct _tree_node_t tree_node_t, node_t;
 typedef struct _http_t http_t;
 
-/* entry process runtines
+/* header process runtines
  */
-typedef int (*FUNC)(http_t *, hdr_entry_t *);
+typedef int (*FUNC)(http_t *, node_t *);
 
-/* entry state
+/* header process tree node state
  */
-enum HDR_ENTRY_STATE
+typedef enum _NODE_STATE
   {
     IGNORING = -1,
     MATCHING = 0,
     PENDING = 1,
     MATCHED = 2,
-  };
+  }NODE_STATE;
 
-/* entry type
+/* tree node type
  */
-enum HDR_ENTRY_TYPE
+typedef enum _NODE_TYPE
   {
     ROOT = 0,
     PATH,
     ENTRY,
-  };
+  }NODE_TYPE;
 
-/* hdr_entry_t
+/* tree node
  */
-struct _hdr_entry_t
+struct _tree_node_t
 {
   char *body;
-  int blen;
-  char *sub_entry_keys;
-  hdr_entry_t *sub_entry_ptrs;
-  int sub_entry_count;
+  int body_len;
+  char *subnode_keys;
+  node_t *subnode_ptrs;
+  int subnode_count;
+  
+  NODE_TYPE type;
+  NODE_STATE state;
+  
   int in_beg;
   int in_end;
   FUNC func1;
@@ -54,8 +58,8 @@ struct _http_t
   char *ptr_buf;
   int *ptr_len;
   int index;
-  hdr_entry_t *entry_root;
-  hdr_entry_t *entry_current;
+  node_t *entry_root;
+  node_t *entry_current;
   int entry_beg_tmp;
 };
 
