@@ -14,7 +14,7 @@ int node_init(node_t *node, int subcount_max)
   subptrs = (NPTR)malloc(subcount_max * sizeof(NPTR));
   if (subptrs == NULL) return  -1;
 
-  node->id = 0;
+  node->id = -1;
   node->beg = 0;
   node->end = 0;
   node->subkeys = subkeys;
@@ -36,16 +36,42 @@ int node_stabilize(node_t *node)
   NPTR subptrs = NULL;
   assert(node != NULL && node->mode == BUILDING);
   if (node == NULL || node->node != BUILDING) return -1;
+  if (node->subcount == 0) return -1;
 
-  
-  subkeys = (char*)malloc(node->subcount * sizeof(char));
+  subkeys_size = node->subcount * sizeof(char);
+  subptrs_size = node->subcount * sizeof(NPTR);
+  subkeys = (char*)malloc(subkeys_size);
   if (subkeys == NULL) return -1;
-  subptrs = (NPTR)malloc(node->subcount * sizeof(NPTR)); 
+  subptrs = (NPTR)malloc(subptrs_size); 
   if (subptrs == NULL) return  -1;
 
-  memcpy(subkeys, node->subkeys, node->subcount)
+  memcpy(subkeys, node->subkeys, subkeys_size);
+  memcpy(subptrs, node->subptrs, subptrs_size);
   
+  free (node->subkeys);
+  free (node->subptrs);
+
+  node->subkeys = subkeys;
+  node->subptrs = subptrs;
+
+  return 0;
 }
 
 void node_uninit(node_t *node)
-{}
+{
+  assert(node != NULL);
+  if (node == NULL) return;
+  
+  free (node->subkeys);
+  free (node->subptrs);
+}
+
+node_t *tree_build(char **ss, int count)
+{
+  NPTR nptrs;
+  assert(ss != NULL && count > 0);
+  if (ss == NULL || count <= 0) return -1;
+
+
+  
+}

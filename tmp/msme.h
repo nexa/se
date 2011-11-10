@@ -47,4 +47,6 @@ int node_init(node_t *node, int subcount_max);
 int node_stabilize(node_t *node);
 void node_uninit(node_t *node);
 
+node_t *tree_build(char **ss, int count);
+
 #endif
