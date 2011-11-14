@@ -3,4 +3,4 @@ cd ~/ws/
 find -name "*.o" | xargs rm -v
 find -name "*~" | xargs rm -v
 find -name "*\#" | xargs rm -v
-find -name "*.out" | xargx rm -v
+find -name "*.out" | xargs rm -v

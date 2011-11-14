@@ -44,11 +44,23 @@ typedef struct node_s
   struct node_s *parent_ptr;
 }node_t, *NPTR;
 
+typedef struct msme_s
+{
+  char **strings;
+  unsigned char *indexs;
+  node_t **nodes;
+  unsigned char capility;
+  node_t *root;
+  MODE mode;
+}msme_t;
+
 int node_init(node_t *node, int child_count_max);
 int node_stabilize(node_t *node);
 void node_uninit(node_t *node);
 node_t * node_fork(node_t *node);
 
-node_t * tree_build(char **ss, int count);
+int msme_init(msme_t *msme, unsigned char capility);
+void msme_uninit(msme_t *msme);
+int msme_compile(char **ss, int count);
 
 #endif
