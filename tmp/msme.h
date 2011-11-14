@@ -34,14 +34,14 @@ typedef struct node_s
   int id;
   int beg;
   int end;
-  unsigned char *child_eys;
-  struct node_s *child_ptrs;
+  unsigned char *child_keys;
+  struct node_s **child_ptrs;
   int child_count;
   int child_count_max;
   MODE mode;
   STATE state;
   TYPE type;
-  struct node_t *parent_ptr;
+  struct node_s *parent_ptr;
 }node_t, *NPTR;
 
 int node_init(node_t *node, int child_count_max);
