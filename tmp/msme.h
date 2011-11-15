@@ -59,8 +59,8 @@ int node_stabilize(node_t *node);
 void node_uninit(node_t *node);
 node_t * node_fork(node_t *node);
 
-int msme_init(msme_t *msme, unsigned char capility);
+int msme_init(msme_t *msme, char **strings, unsigned char string_count);
 void msme_uninit(msme_t *msme);
-int msme_compile(char **ss, int count);
+int msme_compile(msme_t *msme);
 
 #endif

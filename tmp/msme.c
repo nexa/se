@@ -103,17 +103,23 @@ node_t * node_fork(node_t *node)
   node->parent_ptr = node_new;
 }
 
-/*
-node_t *tree_build(char **ss, int count)
+int msme_init(msme_t *msme, char **strings, unsigned char string_count)
 {
-  NPTR nptrs;
-  assert(ss != NULL && count > 0);
-  if (ss == NULL || count <= 0) return -1;
+  assert(msme != NULL && strings != NULL && string_count > 0);
+  if (msme == NULL || strings == NULL || string_count <= 0) return -1;
 
   
-  
 }
-*/
+
+void msme_uninit(msme_t *msme)
+{
+
+}
+
+int msme_compile(msme_t *msme)
+{
+
+}
 
 int main(int argc, char **argv)
 {
