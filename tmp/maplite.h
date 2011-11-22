@@ -20,8 +20,7 @@ typedef enum _TYPE
 typedef struct maplite_s
 {
   TYPE type;
-  int *keys;
-  void **values
+  void **values;
   int capility;
   int size;
   int keybase;
