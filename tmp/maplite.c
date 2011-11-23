@@ -4,28 +4,28 @@
 
 #include "maplite.h"
 
-int maplite_init(maplite_t *map, TYPE type)
+int maplite_init(maplite_t *map, KEYRANGE range)
 {
   int memsize;
   assert(map != NULL);
   if (map == NULL) return -1;
 
-  if (type == DEC)
+  if (range == DEC)
     {
       map->capility = 10;
       map->keybase = 0;
     }
-  else if (type == HEX)
+  else if (range == HEX)
     {
       map->capility = 16;
       map->keybase = 0;
     }
-  else if (type == LOWER)
+  else if (range == LOWER)
     {
       map->capility = 26;
       map->keybase = 'a';
     }
-  else if (type == UPPER)
+  else if (range == UPPER)
     {
       map->capility = 26;
       map->keybase = 'A';
@@ -35,11 +35,14 @@ int maplite_init(maplite_t *map, TYPE type)
       map->capility = 256;
       map->keybase = 0;
     }
+  map->range = range;
 
   memsize = map->capility * sizeof(void*);
   map->values = (void**)malloc(memsize);
   bzero(map->values, memsize);
   map->size = 0;
+
+  return 0;
 }
 
 void maplite_uninit(maplite_t *map)

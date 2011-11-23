@@ -10,7 +10,8 @@
 
 typedef enum _STATE
   {
-    MATCHING = 0,
+    DEFAULT = 0,
+    MATCHING,
     PENDING,
     MATCHED,
   }STATE;
@@ -31,7 +32,23 @@ typedef struct node_s
   maplite_t childs;
   STATE state;
   TYPE type;
-  
+  struct node_s *parent;
 }node_t;
+
+typedef struct hdrme_s
+{
+  char **keys;
+  int keycount;
+  struct node_s *root;
+}hdrme_t;
+
+int node_init(node_t *node);
+void node_uninit(node_t *node);
+
+int hdrme_init(hdrme_t *me, char **keys, int count);
+void hdrme_uninit(hdrme_t *me);
+int hdrme_compile(hdrme_t *me);
+void hdrme_dismiss(hdrme_t *me);
+int hdrme_parse(hdrme_t *me, char *txt);
 
 #endif
