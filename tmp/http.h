@@ -6,63 +6,32 @@
 #ifndef _HTTP_H_
 #define _HTTP_H_
 
-typedef struct _tree_node_t tree_node_t, node_t;
-typedef struct _http_t http_t;
+#include "maplite.h"
 
-/* header process runtines
- */
-typedef int (*FUNC)(http_t *, node_t *);
-
-/* header process tree node state
- */
-typedef enum _NODE_STATE
+typedef enum _STATE
   {
-    IGNORING = -1,
     MATCHING = 0,
-    PENDING = 1,
-    MATCHED = 2,
-  }NODE_STATE;
+    PENDING,
+    MATCHED,
+  }STATE;
 
-/* tree node type
- */
-typedef enum _NODE_TYPE
+typedef enum _TYPE
   {
-    ROOT = 0,
-    PATH,
-    ENTRY,
-  }NODE_TYPE;
+    ROOT = 0x1,
+    BRANCH = 0x2,
+    LEAF = 0x4,
+  }TYPE;
 
-/* tree node
- */
-struct _tree_node_t
+typedef struct node_s
 {
-  char *body;
-  int body_len;
-  char *subnode_keys;
-  node_t *subnode_ptrs;
-  int subnode_count;
+  int id;
+  int beg;
+  int end;
+  int mi;
+  maplite_t childs;
+  STATE state;
+  TYPE type;
   
-  NODE_TYPE type;
-  NODE_STATE state;
-  
-  int in_beg;
-  int in_end;
-  FUNC func1;
-  FUNC func2;
-};
-
-/* _http_t
- */
-struct _http_t
-{
-  char *ptr_buf;
-  int *ptr_len;
-  int index;
-  node_t *entry_root;
-  node_t *entry_current;
-  int entry_beg_tmp;
-};
-
-
+}node_t;
 
 #endif
