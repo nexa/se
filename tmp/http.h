@@ -38,7 +38,7 @@ typedef struct node_s
 typedef struct hdrme_s
 {
   char **keys;
-  int keycount;
+  int key_count;
   struct node_s *root;
 }hdrme_t;
 
@@ -50,5 +50,7 @@ void hdrme_uninit(hdrme_t *me);
 int hdrme_compile(hdrme_t *me);
 void hdrme_dismiss(hdrme_t *me);
 int hdrme_parse(hdrme_t *me, char *txt);
+node_t *hdrme_division(hdrme_t *me, node_t *node, int break_index);
+node_t *hdrme_reproduce(hdrme_t *me, node_t *node, int new_id, int new_end);
 
 #endif
