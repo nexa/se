@@ -191,7 +191,7 @@ int hdrme_parse(hdrme_t *me, char *txt)
 			{
 			  /*got it!*/
 			  printf("Find key:%4d at %4d to %4d.\n", node->id, mark, index);
-			  node->state = MATCHING;
+			  /*node->state = MATCHING;*/
 			  node = me->root;
 			  node->state = PENDING;
 			}
