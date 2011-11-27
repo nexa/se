@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -72,9 +73,10 @@ int hdrme_compile(hdrme_t *me)
   char *key_str, *node_str;
 
   tmp = (node_t*)malloc(sizeof(node_t));
+  node_init(tmp);
   tmp->beg = -1;
   tmp->end = -1;
-  tmp->id = 0;
+  tmp->id = -1;
   me->root = tmp;
 
   node = me->root;
@@ -150,6 +152,69 @@ void hdrme_dismiss(hdrme_t *me)
 
 int hdrme_parse(hdrme_t *me, char *txt)
 {
+  int index, mark, len;
+  node_t *node;
+  char *node_str;
+
+  assert(me != NULL && txt != NULL);
+  if (me == NULL || txt == NULL) return -1;
+
+  me->root->state = PENDING;
+  
+  index = 0;
+  mark = 0;
+  len = strlen(txt);
+  node = me->root;
+  while (index < len)
+    {
+      if (node->state == PENDING)
+	{
+	  if (node == me->root) mark = index;
+	  node = maplite_get(&node->childs, (int)(txt[index]));
+	  if (node == NULL) node = me->root;
+	  if (node != me->root)
+	    {
+	      node->mi = node->beg;
+	      node->state = MATCHING;
+	      node_str = me->keys[node->id];
+	    }
+	}
+      if (node->state == MATCHING)
+	{
+	  if (node->mi <= node->end)
+	    {
+	      if (txt[index] == node_str[node->mi])
+		{
+		  if (node->mi == node->end)
+		    {
+		      if ((node->type & LEAF) == LEAF)
+			{
+			  /*got it!*/
+			  printf("Find key:%4d at %4d to %4d.\n", node->id, mark, index);
+			  node->state = MATCHING;
+			  node = me->root;
+			  node->state = PENDING;
+			}
+		      else
+			{
+			  node->state = PENDING;
+			}
+		    }
+		  else
+		    {
+		      node->mi++;
+		    }
+		}
+	      else
+		{
+		  node = me->root;
+		  node->state = PENDING;
+		}
+	    }
+	}
+      index++;
+    }
+
   return 0;
 }
 
@@ -161,6 +226,7 @@ node_t *hdrme_division(hdrme_t *me, node_t *node, int break_index)
   if (me == NULL || node == NULL || break_index > (node->end -1)) return NULL;
 
   new = (node_t*)malloc(sizeof(node_t));
+  node_init(new);
   new->id = node->id;
   new->beg = node->beg;
   new->end = break_index;
@@ -190,6 +256,7 @@ node_t *hdrme_reproduce(hdrme_t *me, node_t *node, int new_id, int new_end)
   if (new_end < strlen(key_str))
     {
       new = (node_t*)malloc(sizeof(node_t));
+      node_init(new);
       new->id = new_id;
       new->beg = node->end + 1;
       new->end = new_end;
@@ -197,7 +264,7 @@ node_t *hdrme_reproduce(hdrme_t *me, node_t *node, int new_id, int new_end)
 
       node->type = BRANCH;
 
-      maplite_set(&node->childs, (int)key_str[new_id], (void*)new);
+      maplite_set(&node->childs, (int)key_str[new->beg], (void*)new);
       
       return new;
     }
