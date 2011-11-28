@@ -23,7 +23,7 @@ typedef enum _TYPE
     LEAF = 0x4,
   }TYPE;
 
-typedef struct node_s
+typedef struct hdr_parser_s
 {
   int id;
   int beg;
@@ -32,25 +32,25 @@ typedef struct node_s
   maplite_t childs;
   STATE state;
   TYPE type;
-  struct node_s *parent;
-}node_t;
+  struct hdr_parser_s *parent;
+}hdr_parser_t;
 
-typedef struct hdrme_s
+typedef struct http_s
 {
-  char **keys;
-  int key_count;
-  struct node_s *root;
-}hdrme_t;
+  char **hdr_names;
+  int hdr_count;
+  struct hdr_parser_s *hdr_parser_root;
+}http_t;
 
-int node_init(node_t *node);
-void node_uninit(node_t *node);
+int hdr_parser_init(hdr_parser_t *hdr);
+void hdr_parser_uninit(hdr_parser_t *hdr);
 
-int hdrme_init(hdrme_t *me, char **keys, int count);
-void hdrme_uninit(hdrme_t *me);
-int hdrme_compile(hdrme_t *me);
-void hdrme_dismiss(hdrme_t *me);
-int hdrme_parse(hdrme_t *me, char *txt);
-node_t *hdrme_division(hdrme_t *me, node_t *node, int break_index);
-node_t *hdrme_reproduce(hdrme_t *me, node_t *node, int new_id, int new_end);
+int http_init(http_t *http, char **hdr_names, int hdr_count);
+void http_uninit(http_t *http);
+int hdr_parser_compile(http_t *http);
+void hdr_parser_dismiss(http_t *http);
+int http_parse(http_t *http, char *txt);
+hdr_parser_t *hdr_parser_division(http_t *http, hdr_parser_t *hdr, int break_index);
+hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, int new_end);
 
 #endif

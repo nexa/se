@@ -6,117 +6,117 @@
 
 #include "http.h"
 
-int node_init(node_t *node)
+int hdr_parser_init(hdr_parser_t *hdr)
 {
-  assert(node != NULL);
-  if (node == NULL) return -1;
+  assert(hdr != NULL);
+  if (hdr == NULL) return -1;
 
-  node->id = -1;
-  node->beg = -1;
-  node->end = -1;
-  node->mi = -1;
-  node->state = DEFAULT;
-  node->type = LEAF;
-  node->parent = NULL;
+  hdr->id = -1;
+  hdr->beg = -1;
+  hdr->end = -1;
+  hdr->mi = -1;
+  hdr->state = DEFAULT;
+  hdr->type = LEAF;
+  hdr->parent = NULL;
 
-  maplite_init(&node->childs, ASCII);
+  maplite_init(&hdr->childs, ASCII);
 
   return 0;
 }
 
-void node_uninit(node_t *node)
+void hdr_parser_uninit(hdr_parser_t *hdr)
 {
   int i;
-  assert(node != NULL);
-  if (node == NULL) return;
+  assert(hdr != NULL);
+  if (hdr == NULL) return;
 
-  for (i = 0;i < (node->childs).capility;i++)
+  for (i = 0;i < (hdr->childs).capility;i++)
     {
-      if ((node->childs).values[i] != NULL)
+      if ((hdr->childs).values[i] != NULL)
 	{
-	  node_uninit((node_t*)(node->childs).values[i]);
-	  free ((node->childs).values[i]);
+	  hdr_parser_uninit((hdr_parser_t*)(hdr->childs).values[i]);
+	  free ((hdr->childs).values[i]);
 	}
     }  
 
-  maplite_uninit(&node->childs);
+  maplite_uninit(&hdr->childs);
 }
 
-int hdrme_init(hdrme_t *me, char **keys, int count)
+int http_init(http_t *http, char **hdr_names, int hdr_count)
 {
   int memsize;
-  assert(me != NULL && keys != NULL && count >= 1);
-  if (me == NULL || keys == NULL || count < 1) return -1;
+  assert(http != NULL && hdr_names != NULL && hdr_count >= 1);
+  if (http == NULL || hdr_names == NULL || hdr_count < 1) return -1;
 
-  memsize = count * sizeof(char*);
-  me->keys = (char**)malloc(memsize);
-  if (me->keys == NULL) return -1;
-  memcpy(me->keys, keys, memsize);
-  me->key_count = count;
-  me->root = NULL;
+  memsize = hdr_count * sizeof(char*);
+  http->hdr_names = (char**)malloc(memsize);
+  if (http->hdr_names == NULL) return -1;
+  memcpy(http->hdr_names, hdr_names, memsize);
+  http->hdr_count = hdr_count;
+  http->hdr_parser_root = NULL;
 
   return 0;
 }
   
-void hdrme_uninit(hdrme_t *me)
+void http_uninit(http_t *http)
 {
-  assert(me != NULL);
-  if (me == NULL) return;
+  assert(http != NULL);
+  if (http == NULL) return;
 
-  free (me->keys);
+  free (http->hdr_names);
 }
   
-int hdrme_compile(hdrme_t *me)
+int hdr_parser_compile(http_t *http)
 {
-  node_t *node, *tmp;
-  int i, j, key_len;
-  char *key_str, *node_str;
+  hdr_parser_t *hdr, *tmp;
+  int i, j, hdr_len;
+  char *hdr_str, *hdr_parser_str;
 
-  tmp = (node_t*)malloc(sizeof(node_t));
-  node_init(tmp);
+  tmp = (hdr_parser_t*)malloc(sizeof(hdr_parser_t));
+  hdr_parser_init(tmp);
   tmp->beg = -1;
   tmp->end = -1;
   tmp->id = -1;
-  me->root = tmp;
+  http->hdr_parser_root = tmp;
 
-  node = me->root;
-  for (i = 0;i < me->key_count;i++)
+  hdr = http->hdr_parser_root;
+  for (i = 0;i < http->hdr_count;i++)
     {
       j = 0;
-      key_str = me->keys[i];
-      key_len = strlen(key_str);
+      hdr_str = http->hdr_names[i];
+      hdr_len = strlen(hdr_str);
       
       while (1)
 	{
-	  if (j < key_len)
+	  if (j < hdr_len)
 	    {
-	      if (j > node->end)
+	      if (j > hdr->end)
 		{
-		  tmp = (node_t*)maplite_get(&node->childs, (int)key_str[j]);
+		  tmp = (hdr_parser_t*)maplite_get(&hdr->childs, (int)hdr_str[j]);
 		  if (tmp == NULL)
 		    {
-		      hdrme_reproduce(me, node, i, key_len - 1);
-		      node = me->root;
+		      hdr_parser_reproduce(http, hdr, i, hdr_len - 1);
+		      hdr = http->hdr_parser_root;
 		      break;
 		    }
 		  else
 		    {
-		      node = tmp;
-		      node->mi = node->beg;
+		      hdr = tmp;
+		      hdr->mi = hdr->beg;
 		    }
 		}	   
-	      else if (j >= node->beg && j <= node->end)
+	      else if (j >= hdr->beg && j <= hdr->end)
 		{
-		  node_str = me->keys[node->id];
-		  if (key_str[j] == node_str[node->mi + 1])
+		  hdr_parser_str = http->hdr_names[hdr->id];
+		  if (hdr_str[j] == hdr_parser_str[hdr->mi + 1])
 		    {
-		      node->mi += 1;
+		      hdr->mi += 1;
 		    }
 		  else
 		    {
-		      tmp = hdrme_division(me, node, node->mi);
-		      hdrme_reproduce(me, tmp, i, key_len - 1);
-		      node = me->root;
+		      tmp = hdr_parser_division(http, hdr, hdr->mi);
+		      hdr_parser_reproduce(http, tmp, i, hdr_len - 1);
+		      hdr = http->hdr_parser_root;
 		      break;
 		    }
 		}
@@ -124,13 +124,13 @@ int hdrme_compile(hdrme_t *me)
 	    }
 	  else
 	    {
-	      if (node->mi < node->end)
+	      if (hdr->mi < hdr->end)
 		{
-		  tmp = hdrme_division(me, node, node->mi);
+		  tmp = hdr_parser_division(http, hdr, hdr->mi);
 		}
-	      else if (node->mi == node->end){}
+	      else if (hdr->mi == hdr->end){}
 	      else {/*error*/}
-	      node = me->root;
+	      hdr = http->hdr_parser_root;
 	      break;
 	    }
 	  j++;
@@ -140,37 +140,37 @@ int hdrme_compile(hdrme_t *me)
   return 0;
 }  
 
-void hdrme_dismiss(hdrme_t *me)
+void hdr_parser_dismiss(http_t *http)
 {
-  assert(me != NULL);
-  if (me == NULL) return;
+  assert(http != NULL);
+  if (http == NULL) return;
 
-  node_uninit(me->root);
-  free (me->root);
-  me->root = NULL;
+  hdr_parser_uninit(http->hdr_parser_root);
+  free (http->hdr_parser_root);
+  http->hdr_parser_root = NULL;
 }
 
-int hdrme_parse(hdrme_t *me, char *txt)
+int http_parse(http_t *http, char *txt)
 {
   int index, mark, len, markv;
-  node_t *node;
-  char *node_str;
+  hdr_parser_t *hdr;
+  char *hdr_parser_str;
 
-  assert(me != NULL && txt != NULL);
-  if (me == NULL || txt == NULL) return -1;
+  assert(http != NULL && txt != NULL);
+  if (http == NULL || txt == NULL) return -1;
 
-  me->root->state = PENDING;
+  http->hdr_parser_root->state = PENDING;
   
   index = 0;
   mark = 0;
   markv = 0;
   len = strlen(txt);
-  node = me->root;
+  hdr = http->hdr_parser_root;
   while (index < len)
     {
-      if (index > node->end)
+      if (index > hdr->end)
 	{
-	  if (node->state == MATCHED)
+	  if (hdr->state == MATCHED)
 	    {
 	      if (txt[index] == ';')
 		{
@@ -179,8 +179,8 @@ int hdrme_parse(hdrme_t *me, char *txt)
 		  bzero(buf, 32);
 		  memcpy(buf, txt + (markv + 1), len);
 		  /*done*/
-		  printf("key:%4d value: %8s\n", node->id, buf);
-		  node = me->root;
+		  printf("key:%4d value: %8s\n", hdr->id, buf);
+		  hdr = http->hdr_parser_root;
 		}
 	    }
 	  else
@@ -188,39 +188,39 @@ int hdrme_parse(hdrme_t *me, char *txt)
 	      if (txt[index] == ' ') {}
 	      else if (txt[index] == ':')
 		{
-		  node->state = MATCHED;
+		  hdr->state = MATCHED;
 		  markv = index;
 		}
 	      else if (txt[index] == ';')
 		{
 		  /*unrecgniziable*/
-		  node = me->root;
-		  node->state = MATCHING;
+		  hdr = http->hdr_parser_root;
+		  hdr->state = MATCHING;
 		}
 	      else
 		{
-		  if (node == me->root) mark = index;
-		  node = maplite_get(&node->childs, (int)txt[index]);
-		  if (node == NULL) node = me->root;
-		  if (node != me->root)
+		  if (hdr == http->hdr_parser_root) mark = index;
+		  hdr = maplite_get(&hdr->childs, (int)txt[index]);
+		  if (hdr == NULL) hdr = http->hdr_parser_root;
+		  if (hdr != http->hdr_parser_root)
 		    {
-		      node->mi = node->beg;
-		      node->state = MATCHING;
-		      node_str = me->keys[node->id];
+		      hdr->mi = hdr->beg;
+		      hdr->state = MATCHING;
+		      hdr_parser_str = http->hdr_names[hdr->id];
 		    }
 		}
 	    }
 	}
-      else if (index > node->mi && index <= node->end)
+      else if (index > hdr->mi && index <= hdr->end)
 	{
-	  if (txt[index] == node_str[node->mi + 1])
+	  if (txt[index] == hdr_parser_str[hdr->mi + 1])
 	    {
-	      node->mi++;
+	      hdr->mi++;
 	    }
 	  else
 	    {
-	      node = me->root;
-	      node->state = MATCHING;
+	      hdr = http->hdr_parser_root;
+	      hdr->state = MATCHING;
 	    }
 	}
       else {/*error!*/}
@@ -230,53 +230,53 @@ int hdrme_parse(hdrme_t *me, char *txt)
   return 0;
 }
 
-node_t *hdrme_division(hdrme_t *me, node_t *node, int break_index)
+hdr_parser_t *hdr_parser_division(http_t *http, hdr_parser_t *hdr, int break_index)
 {
-  node_t *new;
-  char *key_str;
-  assert(me != NULL && node != NULL && break_index <= (node->end - 1));
-  if (me == NULL || node == NULL || break_index > (node->end -1)) return NULL;
+  hdr_parser_t *new;
+  char *hdr_str;
+  assert(http != NULL && hdr != NULL && break_index <= (hdr->end - 1));
+  if (http == NULL || hdr == NULL || break_index > (hdr->end -1)) return NULL;
 
-  new = (node_t*)malloc(sizeof(node_t));
-  node_init(new);
-  new->id = node->id;
-  new->beg = node->beg;
+  new = (hdr_parser_t*)malloc(sizeof(hdr_parser_t));
+  hdr_parser_init(new);
+  new->id = hdr->id;
+  new->beg = hdr->beg;
   new->end = break_index;
   new->type = BRANCH;
-  new->parent = node->parent;
+  new->parent = hdr->parent;
 
-  node->beg = break_index + 1;
-  node->parent = new;
+  hdr->beg = break_index + 1;
+  hdr->parent = new;
 
-  key_str = me->keys[node->id];
-  maplite_set(&new->childs, (int)key_str[node->beg], (void*)node);
-  maplite_set(&new->parent->childs, (int)key_str[new->beg], (void*)new);
+  hdr_str = http->hdr_names[hdr->id];
+  maplite_set(&new->childs, (int)hdr_str[hdr->beg], (void*)hdr);
+  maplite_set(&new->parent->childs, (int)hdr_str[new->beg], (void*)new);
 
   return new;
 }
 
-node_t *hdrme_reproduce(hdrme_t *me, node_t *node, int new_id, int new_end)
+hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, int new_end)
 {
-  node_t *new;
-  char *key_str;
-  assert(me != NULL && node != NULL);
-  assert(new_id > node->id && new_id < me->key_count);
-  if (me == NULL || node == NULL) return NULL;
-  if (new_id <= node->id || new_id >= me->key_count) return NULL;
+  hdr_parser_t *new;
+  char *hdr_str;
+  assert(http != NULL && hdr != NULL);
+  assert(new_id > hdr->id && new_id < http->hdr_count);
+  if (http == NULL || hdr == NULL) return NULL;
+  if (new_id <= hdr->id || new_id >= http->hdr_count) return NULL;
 
-  key_str = me->keys[new_id];
-  if (new_end < strlen(key_str))
+  hdr_str = http->hdr_names[new_id];
+  if (new_end < strlen(hdr_str))
     {
-      new = (node_t*)malloc(sizeof(node_t));
-      node_init(new);
+      new = (hdr_parser_t*)malloc(sizeof(hdr_parser_t));
+      hdr_parser_init(new);
       new->id = new_id;
-      new->beg = node->end + 1;
+      new->beg = hdr->end + 1;
       new->end = new_end;
-      new->parent = node;
+      new->parent = hdr;
 
-      node->type = BRANCH;
+      hdr->type = BRANCH;
 
-      maplite_set(&node->childs, (int)key_str[new->beg], (void*)new);
+      maplite_set(&hdr->childs, (int)hdr_str[new->beg], (void*)new);
       
       return new;
     }

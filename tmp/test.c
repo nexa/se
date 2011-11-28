@@ -10,16 +10,16 @@ char txt[] = "ab:12;ac:21;";
 
 int main(int argc, char **argv)
 {
-  hdrme_t me;
+  http_t me;
   char *keys[] = {sz1, sz2};
 
-  hdrme_init(&me, keys, 3);
-  hdrme_compile(&me);
+  http_init(&me, keys, 2);
+  hdr_parser_compile(&me);
 
-  hdrme_parse(&me, txt);
+  http_parse(&me, txt);
 
-  hdrme_dismiss(&me);
-  hdrme_uninit(&me);
+  hdr_parser_dismiss(&me);
+  http_uninit(&me);
 
   exit(0);
 }
