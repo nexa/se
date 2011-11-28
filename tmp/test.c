@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include "http.h"
 
-char sz1[] = "abcd";
-char sz2[] = "abce";
+char sz1[] = "ab";
+char sz2[] = "ac";
 char sz3[] = "acbe";
 
-char txt[] = "abcd1abce3acbeabcd";
+char txt[] = "ab:12;ac:21;";
 
 int main(int argc, char **argv)
 {
   hdrme_t me;
-  char *keys[] = {sz1, sz2, sz3};
+  char *keys[] = {sz1, sz2};
 
   hdrme_init(&me, keys, 3);
   hdrme_compile(&me);

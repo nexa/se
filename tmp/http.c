@@ -152,7 +152,7 @@ void hdrme_dismiss(hdrme_t *me)
 
 int hdrme_parse(hdrme_t *me, char *txt)
 {
-  int index, mark, len;
+  int index, mark, len, markv;
   node_t *node;
   char *node_str;
 
@@ -163,58 +163,70 @@ int hdrme_parse(hdrme_t *me, char *txt)
   
   index = 0;
   mark = 0;
+  markv = 0;
   len = strlen(txt);
   node = me->root;
   while (index < len)
     {
-      if (node->state == PENDING)
+      if (index > node->end)
 	{
-	  if (node == me->root) mark = index;
-	  node = maplite_get(&node->childs, (int)(txt[index]));
-	  if (node == NULL) node = me->root;
-	  if (node != me->root)
+	  if (node->state == MATCHED)
 	    {
-	      node->mi = node->beg;
-	      node->state = MATCHING;
-	      node_str = me->keys[node->id];
-	    }
-	}
-      if (node->state == MATCHING)
-	{
-	  if (node->mi <= node->end)
-	    {
-	      if (txt[index] == node_str[node->mi])
+	      if (txt[index] == ';')
 		{
-		  if (node->mi == node->end)
-		    {
-		      if ((node->type & LEAF) == LEAF)
-			{
-			  /*got it!*/
-			  printf("Find key:%4d at %4d to %4d.\n", node->id, mark, index);
-			  /*node->state = MATCHING;*/
-			  node = me->root;
-			  node->state = PENDING;
-			}
-		      else
-			{
-			  node->state = PENDING;
-			}
-		    }
-		  else
-		    {
-		      node->mi++;
-		    }
+		  int len = (index - 1) - (markv + 1) + 1;
+		  char buf[32];
+		  bzero(buf, 32);
+		  memcpy(buf, txt + (markv + 1), len);
+		  /*done*/
+		  printf("key:%4d value: %8s\n", node->id, buf);
+		  node = me->root;
+		}
+	    }
+	  else
+	    {
+	      if (txt[index] == ' ') {}
+	      else if (txt[index] == ':')
+		{
+		  node->state = MATCHED;
+		  markv = index;
+		}
+	      else if (txt[index] == ';')
+		{
+		  /*unrecgniziable*/
+		  node = me->root;
+		  node->state = MATCHING;
 		}
 	      else
 		{
-		  node = me->root;
-		  node->state = PENDING;
+		  if (node == me->root) mark = index;
+		  node = maplite_get(&node->childs, (int)txt[index]);
+		  if (node == NULL) node = me->root;
+		  if (node != me->root)
+		    {
+		      node->mi = node->beg;
+		      node->state = MATCHING;
+		      node_str = me->keys[node->id];
+		    }
 		}
 	    }
 	}
+      else if (index > node->mi && index <= node->end)
+	{
+	  if (txt[index] == node_str[node->mi + 1])
+	    {
+	      node->mi++;
+	    }
+	  else
+	    {
+	      node = me->root;
+	      node->state = MATCHING;
+	    }
+	}
+      else {/*error!*/}
+      
       index++;
     }
-
   return 0;
 }
 
