@@ -152,8 +152,63 @@ void hdr_parser_dismiss(http_t *http)
 
 int http_parse_result(http_t *http)
 {
+  int blanks[2];
+  int index, flag, mark, cr;
   assert(http != NULL);
   if (http == NULL) return -1;
+  
+  cr = 0;
+  mark = 0;
+  flag = 0;
+  index = 0;
+  http->mi = 0;
+  while (http->mi <= http->hypertext_length)
+    {
+      if (flag == 0)
+	{
+	  if (http->hypertext[http->mi] != ' ')
+	    {
+	      mark = http->mi;
+	      flag = 1;
+	    }
+	}
+      else
+	{
+	  if (index < 2)
+	    {
+	      if (http->hypertext[http->mi] == ' ')
+		{
+		  /*done!*/
+		  int len = http->mi - mark;
+		  char *buf = (char*)malloc(sizeof(char), len + 1);
+		  memset(buf, 0, len + 1);
+		  memcpy(buf, http->hypertext + mark);
+	     
+
+		  printf("result: %8s\n", buf);
+		  index++;
+		  flag = 0;
+		}
+	    }
+	  else
+	    {
+	      if (http->hypertext[http->mi] == '\r' )
+		{
+		  cr++;
+		}
+	      else if (http->hypertext[http->mi] == '\n')
+		{
+		  if (cr > 1) return -1;
+		  /*done*/
+		  int len = http->mi - mark - cr;
+
+
+		}
+	    }
+	}
+
+      http->mi++;
+    }
 }
 
 int http_parse_hdr(http_t *http, char *txt)
@@ -287,4 +342,32 @@ hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, 
       return new;
     }
   return NULL;
+}
+
+void http_hypertext_attach(http_t *http, char* hypertext)
+{
+  assert(http != NULL || hypertext != NULL);
+  if (http == NULL || hypertext == NULL) return;
+
+  http->hypertext = hypertext;
+  http->hypertext_length = 0;
+  http->mi = 0;
+}
+
+void http_hypertext_detach(http_t *http)
+{
+  assert(http != NULL);
+  if (http == NULL) return;
+
+  http->hypertext = NULL;
+  http->hypertext_length = -1;
+  http->mi = -1;
+}
+
+int http_hypertext_receving(http_t *http, int hypertext_len)
+{
+  assert(http != NULL);
+  if (http == NULL || hypertext_len <= http->hypertext_length) return -1;
+
+  /*todo*/
 }

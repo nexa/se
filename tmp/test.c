@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   http_init(&me, keys, 2);
   hdr_parser_compile(&me);
 
-  http_parse(&me, txt);
+  http_parse_hdr(&me, txt);
 
   hdr_parser_dismiss(&me);
   http_uninit(&me);

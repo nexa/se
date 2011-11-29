@@ -43,6 +43,9 @@ typedef struct http_s
   char **hdr_names;
   int hdr_count;
   struct hdr_parser_s *hdr_parser_root;
+  char *hypertext;
+  int hypertext_length;
+  int mi;
 }http_t;
 
 int hdr_parser_init(hdr_parser_t *hdr);
@@ -56,5 +59,8 @@ int http_init(http_t *http, char **hdr_names, int hdr_count);
 void http_uninit(http_t *http);
 int http_parse_result(http_t *http);
 int http_parse_hdr(http_t *http, char *txt);
+void http_hypertext_attach(http_t *http, char* hypertext);
+void http_hypertext_detach(http_t *http);
+int http_hypertext_receving(http_t *http, int hypertext_len);
 
 #endif
