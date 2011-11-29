@@ -150,7 +150,13 @@ void hdr_parser_dismiss(http_t *http)
   http->hdr_parser_root = NULL;
 }
 
-int http_parse(http_t *http, char *txt)
+int http_parse_result(http_t *http)
+{
+  assert(http != NULL);
+  if (http == NULL) return -1;
+}
+
+int http_parse_hdr(http_t *http, char *txt)
 {
   int index, mark, len, markv;
   hdr_parser_t *hdr;
@@ -172,7 +178,7 @@ int http_parse(http_t *http, char *txt)
 	{
 	  if (hdr->state == MATCHED)
 	    {
-	      if (txt[index] == ';')
+	      if (txt[index] == '\n')
 		{
 		  int len = (index - 1) - (markv + 1) + 1;
 		  char buf[32];
@@ -191,7 +197,7 @@ int http_parse(http_t *http, char *txt)
 		  hdr->state = MATCHED;
 		  markv = index;
 		}
-	      else if (txt[index] == ';')
+	      else if (txt[index] == '\n')
 		{
 		  /*unrecgniziable*/
 		  hdr = http->hdr_parser_root;

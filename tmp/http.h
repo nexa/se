@@ -37,6 +37,9 @@ typedef struct hdr_parser_s
 
 typedef struct http_s
 {
+  char *version;
+  char *code;
+  char *state;
   char **hdr_names;
   int hdr_count;
   struct hdr_parser_s *hdr_parser_root;
@@ -44,13 +47,14 @@ typedef struct http_s
 
 int hdr_parser_init(hdr_parser_t *hdr);
 void hdr_parser_uninit(hdr_parser_t *hdr);
+int hdr_parser_compile(http_t *http);
+void hdr_parser_dismiss(http_t *http);
+hdr_parser_t *hdr_parser_division(http_t *http, hdr_parser_t *hdr, int break_index);
+hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, int new_end);
 
 int http_init(http_t *http, char **hdr_names, int hdr_count);
 void http_uninit(http_t *http);
-int hdr_parser_compile(http_t *http);
-void hdr_parser_dismiss(http_t *http);
-int http_parse(http_t *http, char *txt);
-hdr_parser_t *hdr_parser_division(http_t *http, hdr_parser_t *hdr, int break_index);
-hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, int new_end);
+int http_parse_result(http_t *http);
+int http_parse_hdr(http_t *http, char *txt);
 
 #endif

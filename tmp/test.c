@@ -6,7 +6,8 @@ char sz1[] = "ab";
 char sz2[] = "ac";
 char sz3[] = "acbe";
 
-char txt[] = "ab:12;ac:21;";
+char txt[] = "ab:12\nad\nac:213\n";
+
 
 int main(int argc, char **argv)
 {
