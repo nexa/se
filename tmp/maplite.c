@@ -6,7 +6,7 @@
 
 int maplite_init(maplite_t *map, KEYRANGE range)
 {
-  int memsize;
+  unsigned int memsize;
   assert(map != NULL);
   if (map == NULL) return -1;
 
@@ -53,9 +53,9 @@ void maplite_uninit(maplite_t *map)
   free(map->values);
 }
 
-void maplite_set(maplite_t *map, int key, void *value)
+void maplite_set(maplite_t *map, unsigned int key, void *value)
 {
-  int index;
+  unsigned int index;
   assert(map != NULL);
   assert(key >= map->keybase && key <= (map->keybase + map->capility));
   if (map == NULL) return;
@@ -65,9 +65,9 @@ void maplite_set(maplite_t *map, int key, void *value)
   map->values[index] = value; 
 }
 
-void *maplite_get(maplite_t *map, int key)
+void *maplite_get(maplite_t *map, unsigned int key)
 {
-  int index;
+  unsigned int index;
   assert(map != NULL);
   assert(key >= map->keybase && key <= (map->keybase + map->capility));
   if (map == NULL) return;

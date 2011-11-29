@@ -21,15 +21,15 @@ typedef struct maplite_s
 {
   KEYRANGE range;
   void **values;
-  int capility;
-  int size;
-  int keybase;
+  unsigned int capility;
+  unsigned int size;
+  unsigned int keybase;
 }maplite_t;
 
 int maplite_init(maplite_t *map, KEYRANGE range);
 void maplite_uninit(maplite_t *map);
-void maplite_set(maplite_t *map, int key, void *value);
-void *maplite_get(maplite_t *map, int key);
+void maplite_set(maplite_t *map, unsigned int key, void *value);
+void *maplite_get(maplite_t *map, unsigned int key);
 
 
 #endif

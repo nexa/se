@@ -92,7 +92,7 @@ int hdr_parser_compile(http_t *http)
 	    {
 	      if (j > hdr->end)
 		{
-		  tmp = (hdr_parser_t*)maplite_get(&hdr->childs, (int)hdr_str[j]);
+		  tmp = (hdr_parser_t*)maplite_get(&hdr->childs, (unsigned int)hdr_str[j]);
 		  if (tmp == NULL)
 		    {
 		      hdr_parser_reproduce(http, hdr, i, hdr_len - 1);
@@ -200,7 +200,7 @@ int http_parse(http_t *http, char *txt)
 	      else
 		{
 		  if (hdr == http->hdr_parser_root) mark = index;
-		  hdr = maplite_get(&hdr->childs, (int)txt[index]);
+		  hdr = maplite_get(&hdr->childs, (unsigned int)txt[index]);
 		  if (hdr == NULL) hdr = http->hdr_parser_root;
 		  if (hdr != http->hdr_parser_root)
 		    {
@@ -249,8 +249,8 @@ hdr_parser_t *hdr_parser_division(http_t *http, hdr_parser_t *hdr, int break_ind
   hdr->parent = new;
 
   hdr_str = http->hdr_names[hdr->id];
-  maplite_set(&new->childs, (int)hdr_str[hdr->beg], (void*)hdr);
-  maplite_set(&new->parent->childs, (int)hdr_str[new->beg], (void*)new);
+  maplite_set(&new->childs, (unsigned int)hdr_str[hdr->beg], (void*)hdr);
+  maplite_set(&new->parent->childs, (unsigned int)hdr_str[new->beg], (void*)new);
 
   return new;
 }
@@ -276,7 +276,7 @@ hdr_parser_t *hdr_parser_reproduce(http_t *http, hdr_parser_t *hdr, int new_id, 
 
       hdr->type = BRANCH;
 
-      maplite_set(&hdr->childs, (int)hdr_str[new->beg], (void*)new);
+      maplite_set(&hdr->childs, (unsigned int)hdr_str[new->beg], (void*)new);
       
       return new;
     }
