@@ -180,10 +180,9 @@ int http_parse_result(http_t *http)
 		{
 		  /*done!*/
 		  int len = http->mi - mark;
-		  char *buf = (char*)malloc(sizeof(char), len + 1);
+		  char *buf = (char*)malloc(sizeof(char) * (len + 1));
 		  memset(buf, 0, len + 1);
-		  memcpy(buf, http->hypertext + mark);
-	     
+		  memcpy(buf, http->hypertext + mark, len);
 
 		  printf("result: %8s\n", buf);
 		  index++;
@@ -201,8 +200,11 @@ int http_parse_result(http_t *http)
 		  if (cr > 1) return -1;
 		  /*done*/
 		  int len = http->mi - mark - cr;
-
-
+		  char *buf = (char*)malloc(sizeof(char) * (len + 1));
+		  memset(buf, 0, len + 1);
+		  memcpy(buf, http->hypertext + mark, len);
+		  printf("result: %8s\n", buf);
+		  return 0;
 		}
 	    }
 	}
@@ -369,5 +371,6 @@ int http_hypertext_receving(http_t *http, int hypertext_len)
   assert(http != NULL);
   if (http == NULL || hypertext_len <= http->hypertext_length) return -1;
 
+  http->hypertext_length = hypertext_len;
   /*todo*/
 }
