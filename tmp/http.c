@@ -54,7 +54,8 @@ int http_init(http_t *http, char **hdr_names, int hdr_count)
   memcpy(http->hdr_names, hdr_names, memsize);
   http->hdr_count = hdr_count;
   http->hdr_parser_root = NULL;
-
+  http->hdr_parser_current = NULL;
+  
   return 0;
 }
   
@@ -204,7 +205,8 @@ int http_parse_result(http_t *http)
 		  memset(buf, 0, len + 1);
 		  memcpy(buf, http->hypertext + mark, len);
 		  printf("result: %8s\n", buf);
-		  return 0;
+		  http->mi++;
+		  return http->mi;
 		}
 	    }
 	}
@@ -213,49 +215,58 @@ int http_parse_result(http_t *http)
     }
 }
 
-int http_parse_hdr(http_t *http, char *txt)
+int http_parse_hdr(http_t *http)
 {
   int index, mark, len, markv;
   hdr_parser_t *hdr;
   char *hdr_parser_str;
 
-  assert(http != NULL && txt != NULL);
+  assert(http != NULL && http->hypertext != NULL);
   if (http == NULL || txt == NULL) return -1;
+  assert(hdr_beg > 0 && hdr_beg <= http->hypertext_length);
+  if (hdr_beg <= 0 || hdr_beg > http->hypertext_length) return  1;
 
   http->hdr_parser_root->state = PENDING;
   
-  index = 0;
   mark = 0;
   markv = 0;
-  len = strlen(txt);
-  hdr = http->hdr_parser_root;
-  while (index < len)
+  hdr = http->hdr_parser_current;
+  while (http->mi < http->hypertext_length)
     {
-      if (index > hdr->end)
+      if (http->mi > hdr->end)
 	{
 	  if (hdr->state == MATCHED)
 	    {
-	      if (txt[index] == '\n')
+	      if (http->hypertext[index] == '\n')
 		{
 		  int len = (index - 1) - (markv + 1) + 1;
 		  char buf[32];
 		  bzero(buf, 32);
-		  memcpy(buf, txt + (markv + 1), len);
+		  memcpy(buf, http->hypertext + (markv + 1), len);
 		  /*done*/
 		  printf("key:%4d value: %8s\n", hdr->id, buf);
-		  hdr = http->hdr_parser_root;
+		  http->hdr_parser_current = http->hdr_parser_root;
 		}
 	    }
 	  else
 	    {
-	      if (txt[index] == ' ') {}
-	      else if (txt[index] == ':')
+	      if (http->hypertext[index] == ' ') {}
+	      else if (http->hypertext[index] == ':')
 		{
 		  hdr->state = MATCHED;
 		  markv = index;
 		}
-	      else if (txt[index] == '\n')
+	      else if (http->hypertext[index] == '\n')
 		{
+
+
+
+		  ////////////////////////////////////////////////todo
+
+
+
+
+
 		  /*unrecgniziable*/
 		  hdr = http->hdr_parser_root;
 		  hdr->state = MATCHING;
@@ -354,6 +365,7 @@ void http_hypertext_attach(http_t *http, char* hypertext)
   http->hypertext = hypertext;
   http->hypertext_length = 0;
   http->mi = 0;
+  http->hdr_parser_current = http->hdr_parser_root;
 }
 
 void http_hypertext_detach(http_t *http)
