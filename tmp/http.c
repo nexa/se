@@ -217,89 +217,77 @@ int http_parse_result(http_t *http)
 
 int http_parse_hdr(http_t *http)
 {
-  int index, mark, len, markv;
-  hdr_parser_t *hdr;
+  int mark, len, markv;
   char *hdr_parser_str;
 
-  assert(http != NULL && http->hypertext != NULL);
-  if (http == NULL || txt == NULL) return -1;
-  assert(hdr_beg > 0 && hdr_beg <= http->hypertext_length);
-  if (hdr_beg <= 0 || hdr_beg > http->hypertext_length) return  1;
-
+  assert(http != NULL);
+  if (http == NULL || http->hypertext_length <= 0) return -1;
+    
   http->hdr_parser_root->state = PENDING;
   
   mark = 0;
   markv = 0;
-  hdr = http->hdr_parser_current;
+
   while (http->mi < http->hypertext_length)
     {
-      if (http->mi > hdr->end)
+      if (http->mi > http->hdr_parser_current->end)
 	{
-	  if (hdr->state == MATCHED)
+	  if (http->hdr_parser_current->state == MATCHED)
 	    {
-	      if (http->hypertext[index] == '\n')
+	      if (http->hypertext[http->mi] == '\n')
 		{
-		  int len = (index - 1) - (markv + 1) + 1;
+		  int len = (http->mi - 1) - (markv + 1) + 1;
 		  char buf[32];
 		  bzero(buf, 32);
 		  memcpy(buf, http->hypertext + (markv + 1), len);
 		  /*done*/
-		  printf("key:%4d value: %8s\n", hdr->id, buf);
+		  printf("key:%4d value: %8s\n", http->hdr_parser_current->id, buf);
 		  http->hdr_parser_current = http->hdr_parser_root;
 		}
 	    }
 	  else
 	    {
-	      if (http->hypertext[index] == ' ') {}
-	      else if (http->hypertext[index] == ':')
+	      if (http->hypertext[http->mi] == ' ') {}
+	      else if (http->hypertext[http->mi] == ':')
 		{
-		  hdr->state = MATCHED;
-		  markv = index;
+		  http->hdr_parser_current->state = MATCHED;
+		  markv = http->mi;
 		}
-	      else if (http->hypertext[index] == '\n')
+	      else if (http->hypertext[http->mi] == '\n')
 		{
-
-
-
-		  ////////////////////////////////////////////////todo
-
-
-
-
-
 		  /*unrecgniziable*/
-		  hdr = http->hdr_parser_root;
-		  hdr->state = MATCHING;
+		  http->hdr_parser_current = http->hdr_parser_root;
+		  http->hdr_parser_current->state = MATCHING;
 		}
 	      else
 		{
-		  if (hdr == http->hdr_parser_root) mark = index;
-		  hdr = maplite_get(&hdr->childs, (unsigned int)txt[index]);
-		  if (hdr == NULL) hdr = http->hdr_parser_root;
-		  if (hdr != http->hdr_parser_root)
+		  if (http->hdr_parser_current == http->hdr_parser_root) mark = http->mi;
+		  http->hdr_parser_current = maplite_get(&http->hdr_parser_current->childs, (unsigned int)http->hypertext[http->mi]);
+		  if (http->hdr_parser_current == NULL) http->hdr_parser_current = http->hdr_parser_root;
+		  if (http->hdr_parser_current != http->hdr_parser_root)
 		    {
-		      hdr->mi = hdr->beg;
-		      hdr->state = MATCHING;
-		      hdr_parser_str = http->hdr_names[hdr->id];
+		      http->hdr_parser_current->mi = http->hdr_parser_current->beg;
+		      http->hdr_parser_current->state = MATCHING;
+		      hdr_parser_str = http->hdr_names[http->hdr_parser_current->id];
 		    }
 		}
 	    }
 	}
-      else if (index > hdr->mi && index <= hdr->end)
+      else if (http->mi > http->hdr_parser_current->mi && http->mi <= http->hdr_parser_current->end)
 	{
-	  if (txt[index] == hdr_parser_str[hdr->mi + 1])
+	  if (http->hypertext[http->mi] == hdr_parser_str[http->hdr_parser_current->mi + 1])
 	    {
-	      hdr->mi++;
+	      http->hdr_parser_current->mi++;
 	    }
 	  else
 	    {
-	      hdr = http->hdr_parser_root;
-	      hdr->state = MATCHING;
+	      http->hdr_parser_current = http->hdr_parser_root;
+	      http->hdr_parser_current->state = MATCHING;
 	    }
 	}
       else {/*error!*/}
       
-      index++;
+      http->mi++;
     }
   return 0;
 }

@@ -9,7 +9,7 @@ char sz2[] = "ac";
 char sz3[] = "acbe";
 
 char txt[] = "ab:12\nad\nac:213\n";
-char ht[] = "HTTP/1.1 200 OK\n";
+char ht[] = "HTTP/1.1 200 OK\nab:12\nadab:12\nad\nac:213\n";
 
 int main(int argc, char **argv)
 {
@@ -28,14 +28,15 @@ int main(int argc, char **argv)
 
   res = http_parse_result(&me);
 
-  http_hypertext_detach(&me);
+  /*  http_hypertext_detach(&me);*/
 
 
-  exit(0);
 
   hdr_parser_compile(&me);
 
-  http_parse_hdr(&me, txt);
+  me.hdr_parser_current = me.hdr_parser_root;
+
+  http_parse_hdr(&me);
 
   hdr_parser_dismiss(&me);
   http_uninit(&me);
