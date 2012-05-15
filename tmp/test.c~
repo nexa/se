@@ -4,7 +4,6 @@
 #include <strings.h>
 #include "http.h"
 
-
 char sz1[] = "ab";
 char sz2[] = "ac";
 char sz3[] = "acbe";
