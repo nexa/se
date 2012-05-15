@@ -77,6 +77,6 @@ static int ev_api_poll(event_mgr_t *mgr, struct timeval *tvp) {
   return numevents;
 }
 
-static char *ev_get_api_name(void) {
+static char *ev_api_name(void) {
   return "epoll";
 }

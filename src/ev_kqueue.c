@@ -61,7 +61,7 @@ static int ev_api_poll(event_mgr_t *mgr, struct timeval *tvp) {
   struct timespec timeout;
   timeout.tv_sec = 0;
   timeout.tv_nsec = 1000;
-  retval = kevent(state-kqfd, NULL, 0, state->events, EV_SIZE, &timeout);
+  retval = kevent(state->kqfd, NULL, 0, state->events, EV_SIZE, &timeout);
 
   if (retval > 0) {
     int j;
@@ -79,6 +79,6 @@ static int ev_api_poll(event_mgr_t *mgr, struct timeval *tvp) {
   return numevents;
 }
 
-static char *ev_get_api_name(void) {
+static char *ev_api_name(void) {
   return "kqueue";
 }

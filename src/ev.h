@@ -48,13 +48,13 @@ event_mgr_t *ev_create_event_mgr(void);
 void ev_delete_event_mgr(event_mgr_t *mgr);
 void ev_stop(event_mgr_t *mgr);
 int ev_create_event(event_mgr_t *mgr, int fd, int mask,
-			 EVFILEPROC *proc, void *data);
-void ev_delete_event(event_mgr_t *mgr, int fd);
+			 EVPROC *proc, void *data);
+void ev_delete_event(event_mgr_t *mgr, int fd, int mask);
 int ev_get_mask(event_mgr_t *mgr, int fd);
-int ev_process_events(event_mgr_t *mgr, int flags);
+int ev_process_events(event_mgr_t *mgr);
 int ev_wait(int fd, int mask, long long ms);
 void ev_main(event_mgr_t *mgr);
-char *ev_get_api_name(void);
+static char *ev_get_api_name(void);
 void ev_set_before_sleep_proc(event_mgr_t *mgr, EVBEFORESLEEPPROC *before_proc);
 
 #endif

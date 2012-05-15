@@ -6,12 +6,13 @@
 #include <poll.h>
 #include <string.h>
 
+#include "util.h"
 #include "ev.h"
 
 #ifdef HAVE_EPOLL
-#include "ev_epoll.h"
+#include "ev_epoll.c"
 #else
-#include "ev_kqueue.h"
+#include "ev_kqueue.c"
 #endif
 
 event_mgr_t *ev_create_event_mgr(void) {
@@ -22,7 +23,7 @@ event_mgr_t *ev_create_event_mgr(void) {
   if (mgr == NULL) return NULL;
   mgr->stop = 0;
   mgr->max_fd = -1;
-  mgr->before_sleep = NULL;
+  mgr->bproc = NULL;
   if (ev_api_create(mgr) == -1) {
     free(mgr);
     return NULL;
@@ -63,10 +64,11 @@ void ev_delete_event(event_mgr_t *mgr, int fd, int mask) {
 
   if (fe->mask == EV_NONE) return;
   fe->mask = fe->mask & (~mask);
-  if (fd == mgr->max_fd && fe.mask == EV_NONE) {
+  if (fd == mgr->max_fd && fe->mask == EV_NONE) {
     int j;
     for (j = mgr->max_fd - 1;j >= 0;j--) 
       if (mgr->events[j].mask != EV_NONE)
+	mgr->max_fd = j;
   }
   ev_api_delete_event(mgr, fd, mask);
 }
@@ -115,14 +117,14 @@ int ev_wait(int fd, int mask, long long ms) {
 
   if ((retval = poll (&pfd, 1, ms)) == 1) {
     if (pfd.revents & POLLIN) retmask |= EV_READABLE;
-    if (pdf.revents & POLLOUT) retmask |= EV_WRITABLE;
+    if (pfd.revents & POLLOUT) retmask |= EV_WRITABLE;
     return retmask;
   } else {
     return retval;
   }
 }
 
-int ev_main(event_mgr_t *mgr) {
+void ev_main(event_mgr_t *mgr) {
   mgr->stop = 0;
   while (!mgr->stop) {
     if (mgr->bproc != NULL)
@@ -131,7 +133,7 @@ int ev_main(event_mgr_t *mgr) {
   }
 }
 
-char *ev_get_api_name(void) {
+static char *ev_get_api_name(void) {
   return ev_api_name();
 }
 

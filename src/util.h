@@ -12,11 +12,11 @@
 #else 
 #define CAS2(p,o,n)  CAS2_IMPL((long long *)(p), (long *)(&o), (long *)(&n)) 
 inline 
-bool CAS2_IMPL(long *addr, 
+long CAS2_IMPL(long *addr, 
 	       long * old_value, 
 	       long * new_value) 
 { 
-  bool  ret; 
+  long  ret; 
   __asm__ __volatile__( 
             "lock cmpxchg16b %1;\n" 
             "sete %0;\n" 
